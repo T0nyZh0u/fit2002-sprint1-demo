@@ -16,6 +16,7 @@ function attendanceChart(list){
 function dashboard(focus=false){
  if(!sponsor){showLogin();return;}
  if(selected!=='all'&&!events.some(e=>e.id===selected))selected='all';
+ document.body.classList.remove('signed-out');
  main.className='dashboard-page';
  const list=selected==='all'?events:events.filter(e=>e.id===selected);
  main.innerHTML=`<div class="page-heading"><div><p class="eyebrow">YOUR SUPPORT IN ACTION</p><h1>Sponsor impact dashboard</h1><p class="subtitle">See the reach and activity of the programs you support.</p></div><span class="quarter">Q3 <strong>2026</strong></span></div>
@@ -43,15 +44,17 @@ document.querySelector('#dashboard-nav').addEventListener('click',()=>{history.r
 history.replaceState({selected,detail:null},'');
 
 function showLogin(message=''){
- ++requestVersion;events=[];sponsor='';selected='all';main.className='login-page';
+ ++requestVersion;events=[];sponsor='';selected='all';main.className='login-page';document.body.classList.add('signed-out');
  document.querySelector('#account').textContent='Sponsor sign in';
  document.querySelector('#logout').hidden=true;document.querySelector('#reset').hidden=true;
- main.innerHTML=`<section class="panel login-card"><p class="eyebrow">MLAI SPONSOR WORKSPACE</p><h1>Sign in to your events</h1><p>View the events your sponsor account is authorised to access.</p><form id="login-form"><label for="username">Demo account</label><input id="username" name="username" autocomplete="username" required><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required><button class="login-button" type="submit">Sign in</button><p id="login-error" role="alert"></p></form><p class="login-note">Demo logins: A / A · B / B · C / C<br>Fictional data · Simulated access only.</p></section>`;
+ main.innerHTML=`<div class="login-layout"><section class="login-intro"><a class="login-brand" href="#"><span class="brand-icon">M</span> MLAI <span>Sponsor portal</span></a><p class="eyebrow">COMMUNITY IMPACT, CLEARLY REPORTED</p><h1>Your support.<br>Your impact.</h1><p class="login-lead">See the difference your events make, with a clear view of participation and community outcomes.</p><p class="login-context">Sponsor Impact Dashboard<br><span>Team 0810 · Sprint 1 prototype</span></p></section><section class="login-card" aria-labelledby="login-title"><p class="eyebrow">WELCOME BACK</p><h2 id="login-title">Sign in to your workspace</h2><p>Use your sponsor account to view your events.</p><form id="login-form"><label for="username">Sponsor account</label><input id="username" name="username" autocomplete="username" autocapitalize="characters" spellcheck="false" placeholder="Enter A, B or C" required maxlength="40"><label for="password">Password</label><div class="password-field"><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required maxlength="128"><button type="button" id="toggle-password" aria-label="Show password" aria-pressed="false">Show</button></div><p id="login-error" role="alert" aria-live="polite"></p><button class="login-button" type="submit">Sign in to workspace <span aria-hidden="true">→</span></button></form><details class="demo-help"><summary>Classroom demo accounts</summary><p>A / A — Food Drive<br>B / B — Skills Workshop<br>C / C — Cultural Festival</p></details><p class="login-note">Classroom simulation · Public sample data</p></section></div>`;
+ document.querySelector('#toggle-password').addEventListener('click',()=>{const input=document.querySelector('#password');const button=document.querySelector('#toggle-password');const show=input.type==='password';input.type=show?'text':'password';button.textContent=show?'Hide':'Show';button.setAttribute('aria-label',show?'Hide password':'Show password');button.setAttribute('aria-pressed',String(show));});
+ document.querySelector('#login-form').addEventListener('input',()=>{document.querySelector('#login-error').textContent='';});
  document.querySelector('#login-error').textContent=message;
  document.querySelector('#login-form').addEventListener('submit',event=>{
  event.preventDefault();const form=new FormData(event.target);
  const user=String(form.get('username')).trim();const password=String(form.get('password'));
- if(!Object.hasOwn(demoAccounts,user)||password!==user){document.querySelector('#login-error').textContent='Use A / A, B / B or C / C (uppercase).';return;}
+ if(!Object.hasOwn(demoAccounts,user)||password!==user){document.querySelector('#login-error').textContent='Account or password is incorrect. Please try again.';return;}
  sessionStorage.setItem('demoAccount',user);loadSession();
  });
 }
